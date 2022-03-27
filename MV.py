@@ -24,38 +24,3 @@ def get_prc_mom(ticker, name, start_date, end_date) :
 df_prc = get_prc_mom(ticker, name, start_date, end_date)[0]
 cov = df_prc.pct_change().cov()
 df_rtn = df_prc.pct_change()
-
-#Empty lists to store weights, returns, and volatilities of portfolios made:
-weights = []
-returns = []
-vols = []
-
-tesla_w = 0   #TSLA initial weight
-
-#Loop to calculate each portfolio with 100 different weights for TSLA:
-for i in range(101):
-  #Weights calculation:
-  coke_w = 1 - tesla_w              #Find coke's weight given TSLA's
-  w = np.array([tesla_w, coke_w])   #groups the two weights as one
-  weights.append(w)                 #Adds the two into list
-  tesla_w += 0.01                   #Increase tesla weight each iteration by 0.01
-
-  #Returns:
-  ret = np.dot(w, df_rtn)       #Weighted sum between returns and weights
-  returns.append(ret)               #Add it to the list
-
-  #Volatility:
-  var = np.dot(w.T, np.dot(cov, w))        #w.T*Cov*w as shown previously
-  yearly_vol = np.sqrt(var)*np.sqrt(252)   #Standard deviation is volatility
-  vols.append(yearly_vol)
-
-#Putting made lists into a dictionary:
-port = {'Returns': returns, 'Volatility':vols}
-
-#Placing weights into dictionary made with a list comprehension:
-for counter, symbol in enumerate(df_prc.columns.tolist()):
-  port[symbol + '_Weight'] = [weight[counter] for weight in weights]
-
-#Make a dataframe from the dictionary buil:
-port_df = pd.DataFrame(port)
-port_df.head()
