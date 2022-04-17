@@ -27,10 +27,10 @@ for i in range(0,len(ticker)) :
 df_rtn = df.pct_change().dropna()
 df_dev = df_rtn.std()
 
-df_rtn_1y = pd.DataFrame(1 + df_rtn.mean()).T.prod()**(255) - 1
+df_rtn_1y = ((1 + df_rtn).prod())**(255/len(df_rtn)) -1
 df_dev_1y = df_rtn.std()*((255/len(df_rtn))**0.5)
 df_srp_1y = ((df_rtn_1y - rf) / df_dev_1y) * 1/100
-df_cov_1y = df_rtn.cov() * np.sqrt(255)
+df_cov_1y = df_rtn.cov()*(255/len(df_rtn))
 
 
 def get_mdd(rtn):
@@ -43,7 +43,7 @@ def get_mdd(rtn):
 def get_pf_rtn(wgt, rtn) :
     return wgt.T @ rtn
 def get_pf_dev(wgt, cov) :
-    return (wgt.T @ cov @ wgt)**0.5
+    return np.sqrt(wgt.T @ cov @ wgt)
 def get_pf_sr(wgt, rf, rtn, cov) :
     return ((get_pf_rtn(wgt, rtn) - rf) / get_pf_dev(wgt, cov)) * 1/100
 
@@ -107,10 +107,13 @@ def get_eff_wgt(rf, rtn, cov):
     df = pd.DataFrame([ticker, eff_wgt]).T
     return df, eff_rtn
 
+
 opt_wgt = get_eff_wgt(rf, df_rtn_1y, df_cov_1y)[0]
 opt_rtn = get_eff_wgt(rf, df_rtn_1y, df_cov_1y)[1]
-opt_srp = get_pf_sr((wgt[1]).array, rf, df_rtn_1y, df_cov_1y)
+opt_srp = get_pf_sr((opt_wgt[1]).array, rf, df_rtn_1y, df_cov_1y)
 
 print("[equal]","rtn:",pf_rtn,", srp:",pf_srp)
 print("[optimized]","rtn:",opt_rtn,", srp:",opt_srp)
+
+
 
