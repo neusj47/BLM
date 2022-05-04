@@ -2,6 +2,7 @@ import pandas as pd
 from pandas_datareader import data as pdr
 import numpy as np
 from scipy.optimize import minimize
+import math
 
 # SRP 최적화
 # 0. 초기 값 입력 (무위험수익률, 기간)
@@ -28,10 +29,9 @@ df_rtn = df.pct_change().dropna()
 df_dev = df_rtn.std()
 
 df_rtn_1y = ((1 + df_rtn).prod())**(255/len(df_rtn)) -1
-df_dev_1y = df_rtn.std()*((255/len(df_rtn))**0.5)
+df_dev_1y = df_rtn.std()* math.sqrt(250)
 df_srp_1y = ((df_rtn_1y - rf) / df_dev_1y) * 1/100
-df_cov_1y = df_rtn.cov()*(255/len(df_rtn))
-
+df_cov_1y = df_rtn.cov()* (255)
 
 def get_mdd(rtn):
     df_cumrtn = (1 + rtn).cumprod()
